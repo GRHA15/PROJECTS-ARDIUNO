@@ -1,6 +1,6 @@
 #include <Adafruit_LiquidCrystal.h>
 
-// Connects directly to MCP23008 at address 32 (0x20)
+
 Adafruit_LiquidCrystal lcd(0);
 
 const int BUTTON_PIN = 2; 
@@ -24,7 +24,7 @@ void setup() {
   pinMode(GREEN_PIN, OUTPUT);
   pinMode(BLUE_PIN, OUTPUT);
   
-  // Wakes up the MCP23008 virtual processor
+  
   lcd.begin(16, 2);
   
   randomSeed(analogRead(A0));
