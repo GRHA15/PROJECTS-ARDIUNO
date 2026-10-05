@@ -1,0 +1,131 @@
+#include <Adafruit_LiquidCrystal.h>
+
+// Connects directly to MCP23008 at address 32 (0x20)
+Adafruit_LiquidCrystal lcd(0);
+
+const int BUTTON_PIN = 2; 
+const int RED_PIN    = 9;  
+const int GREEN_PIN  = 10; 
+const int BLUE_PIN   = 11; 
+
+enum GameState { READY, WAITING, REACTION, RESULT };
+GameState state = READY;
+
+unsigned long timer = 0;
+unsigned long waitTime = 0;
+unsigned long startTime = 0;
+unsigned long bestTime = 999999; 
+unsigned long finalTime = 0;
+int roundNum = 1;
+
+void setup() {
+  pinMode(BUTTON_PIN, INPUT_PULLUP); 
+  pinMode(RED_PIN, OUTPUT);
+  pinMode(GREEN_PIN, OUTPUT);
+  pinMode(BLUE_PIN, OUTPUT);
+  
+  // Wakes up the MCP23008 virtual processor
+  lcd.begin(16, 2);
+  
+  randomSeed(analogRead(A0));
+  showReadyState();
+}
+
+void loop() {
+  bool buttonPressed = (digitalRead(BUTTON_PIN) == LOW);
+
+  switch (state) {
+    
+    case READY:
+      if (buttonPressed) {
+        delay(250); 
+        state = WAITING;
+        setLED(true, true, false); 
+        
+        lcd.clear();
+        lcd.print("Don't press yet!");
+        lcd.setCursor(0, 1);
+        lcd.print("Wait for GREEN...");
+        
+        timer = millis();
+        waitTime = random(2000, 5000); 
+      }
+      break;
+
+    case WAITING:
+      if (buttonPressed) {
+        state = RESULT;
+        setLED(true, false, false); 
+        
+        lcd.clear();
+        lcd.print("CHEAT ALERT!");
+        lcd.setCursor(0, 1);
+        lcd.print("You pressed early");
+        delay(3000); 
+        
+        roundNum++;
+        showReadyState();
+      } 
+      else if (millis() - timer >= waitTime) {
+        state = REACTION;
+        setLED(false, true, false); 
+        
+        lcd.clear();
+        lcd.print("PRESS NOW!!!");
+        startTime = millis(); 
+      }
+      break;
+
+    case REACTION:
+      if (buttonPressed) {
+        finalTime = millis() - startTime; 
+        state = RESULT;
+        setLED(false, true, true); 
+        
+        if (finalTime < bestTime) {
+          bestTime = finalTime; 
+        }
+        
+        lcd.clear();
+        lcd.print("Time: ");
+        lcd.print(finalTime);
+        lcd.print(" ms");
+        lcd.setCursor(0, 1);
+        lcd.print("Press to retry");
+        delay(500); 
+      }
+      break;
+
+    case RESULT:
+      if (buttonPressed) {
+        delay(250);
+        roundNum++;
+        showReadyState();
+      }
+      break;
+  }
+}
+
+void showReadyState() {
+  state = READY;
+  setLED(false, false, true); 
+  
+  lcd.clear();
+  lcd.print("Round: ");
+  lcd.print(roundNum);
+  lcd.setCursor(0, 1);
+  
+  if (bestTime == 999999) {
+    lcd.print("Best: -- ms");
+  } else {
+    lcd.print("Best: ");
+    lcd.print(bestTime);
+    lcd.print(" ms");
+  }
+}
+
+void setLED(bool r, bool g, bool b) {
+  digitalWrite(RED_PIN, r ? HIGH : LOW);
+  digitalWrite(GREEN_PIN, g ? HIGH : LOW);
+  digitalWrite(BLUE_PIN, b ? HIGH : LOW);
+}
