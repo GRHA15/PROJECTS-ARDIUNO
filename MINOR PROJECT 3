@@ -1,0 +1,55 @@
+// C++ code
+//
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(39,16,2);
+const int sensor=A0;
+const int motor=8;
+const float on=30.0, off=28.0;
+bool run = false;
+unsigned long time=0;
+void setup()
+{
+  pinMode(motor, OUTPUT);
+  digitalWrite(motor,LOW);
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0,0);
+  lcd.print("Temp Monitor");
+  delay(1000);
+  lcd.clear();
+}
+
+
+void loop()
+{
+  int value=analogRead(sensor);
+  float voltage=value*(5.0/1024.0);
+  float temp=(voltage-0.5)*100;
+  if(temp>on && !run){
+    digitalWrite(motor,HIGH);
+    run=true;
+  }
+  else if(temp<off && run){
+    digitalWrite(motor,LOW);
+    run=false;
+  }
+  
+  if(millis()-time>=300){
+    time=millis();
+    lcd.setCursor(0,0);
+    
+    lcd.print("Temp : ");
+    lcd.print(temp,1);
+     
+    lcd.print(" C   ");
+    
+    lcd.setCursor(0,1);
+    lcd.print("Cooler : ");
+    if(run){
+    	lcd.print("ON ");
+    }
+    else{lcd.print("OFF");}
+  }
+    
+}
