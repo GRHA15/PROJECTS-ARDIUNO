@@ -1,0 +1,23 @@
+
+int led1=10,led2=6;
+void setup()
+{
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  digitalWrite(led1,LOW);
+  digitalWrite(led2,LOW);
+}
+
+void loop()
+{
+  int time=millis();
+  while(millis()-time<1000){
+  	digitalWrite(led1,HIGH);
+  }
+  digitalWrite(led1,LOW);
+  time=millis();
+  while(millis()-time<2000){
+    digitalWrite(led2,HIGH);
+  }
+  digitalWrite(led2,LOW);
+}
