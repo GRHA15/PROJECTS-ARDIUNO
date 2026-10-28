@@ -1,5 +1,8 @@
-
+// C++ code
+//
 int led1=10,led2=6;
+int flag=0;
+unsigned long time=0;
 void setup()
 {
   pinMode(led1, OUTPUT);
@@ -10,14 +13,31 @@ void setup()
 
 void loop()
 {
-  int time=millis();
-  while(millis()-time<1000){
-  	digitalWrite(led1,HIGH);
+
+  if(flag==0){
+    digitalWrite(led1,HIGH);
+    digitalWrite(led2,LOW);
+    flag=1;
+    time=millis();
   }
-  digitalWrite(led1,LOW);
-  time=millis();
-  while(millis()-time<2000){
+  else if(flag==1){
+    if(millis()-time>1000){
+      digitalWrite(led1,LOW);
+      flag=2;
+    }
+  }
+  else if(flag==2){
     digitalWrite(led2,HIGH);
+    time=millis();
+    flag=3;
   }
-  digitalWrite(led2,LOW);
+  else if(flag==3){
+    if(millis()-time>=3000){
+      digitalWrite(led2,LOW);
+      flag=0;
+    }
+    
+  }
+    
 }
+  
